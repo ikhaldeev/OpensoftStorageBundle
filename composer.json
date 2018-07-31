@@ -20,9 +20,9 @@
     "sort-packages": true
   },
   "require": {
-    "php": ">=5.6",
+    "php": ">=7.0",
     "doctrine/orm": "^2.5",
-    "knplabs/gaufrette": "^0.3|^0.4",
+    "knplabs/gaufrette": "1.x-dev",
     "knplabs/knp-paginator-bundle": "^2.5",
     "lexik/form-filter-bundle": "^5.0",
     "symfony/asset": "^2.7|^3.0",

@@ -19,6 +19,13 @@ use Gaufrette\Filesystem;
 class StorageFile extends GaufretteFile
 {
     /**
+     * Function to hash content
+     *
+     * @var callable
+     */
+    private $hashCalculator;
+
+    /**
      * @var integer
      *
      * @ORM\Id
@@ -82,12 +89,14 @@ class StorageFile extends GaufretteFile
      * @param string $key
      * @param Filesystem $filesystem
      * @param Storage $storage
+     * @param null|callable $hashCalculator
      */
-    public function __construct($key, Filesystem $filesystem, Storage $storage)
+    public function __construct($key, Filesystem $filesystem, Storage $storage, $hashCalculator = null)
     {
         parent::__construct($key, $filesystem);
         $this->storage = $storage;
         $this->createdAt = new \DateTime();
+        $this->hashCalculator = $hashCalculator !== null ? $hashCalculator : function ($content) { return md5($content); };
     }
 
     /**
@@ -134,7 +143,7 @@ class StorageFile extends GaufretteFile
     public function setContent($content, $metadata = array())
     {
         $size = parent::setContent($content, $metadata);
-        $this->contentHash = md5($content);
+        $this->contentHash = ($this->hashCalculator)($content);
 
         return $size;
     }

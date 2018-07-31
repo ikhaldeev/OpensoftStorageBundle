@@ -110,7 +110,8 @@ class StorageManagerTest extends \PHPUnit_Framework_TestCase
         $this->assertFileExists($tempFileLocation);
         unlink($tempFileLocation);
 
-        $this->assertTrue($storedFile->delete());
+        $storedFile->delete();
+        $this->assertFalse($storedFile->exists());
     }
 
     public function testStoreFileFromLocalPathAndUnlink()
@@ -127,7 +128,9 @@ class StorageManagerTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(19, $storedFile->getSize());
         $this->assertTrue($storedFile->isLocal());
         $this->assertFileNotExists($tempFileLocation);
-        $this->assertTrue($storedFile->delete());
+
+        $storedFile->delete();
+        $this->assertFalse($storedFile->exists());
     }
 
     public function testCopyStoredFileToScratch()
@@ -160,7 +163,8 @@ class StorageManagerTest extends \PHPUnit_Framework_TestCase
         $this->assertFileExists($tempFileLocation);
         unlink($tempFileLocation);
 
-        $this->assertTrue($storedFile->delete());
+        $storedFile->delete();
+        $this->assertFalse($storedFile->exists());
     }
 
     public function testStoreStream()
@@ -186,7 +190,8 @@ class StorageManagerTest extends \PHPUnit_Framework_TestCase
         $this->assertFileExists($tempFileLocation);
         unlink($tempFileLocation);
 
-        $this->assertTrue($storedFile->delete());
+        $storedFile->delete();
+        $this->assertFalse($storedFile->exists());
     }
 
     /**

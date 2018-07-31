@@ -6,6 +6,7 @@ use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\ORM\EntityManager;
 use Gaufrette\Filesystem;
 use Gaufrette\StreamWrapper;
+use Gaufrette\Util\Size;
 use Opensoft\StorageBundle\Entity\Storage;
 use Opensoft\StorageBundle\Entity\StorageFile;
 use Opensoft\StorageBundle\Entity\StoragePolicy;
@@ -120,7 +121,8 @@ class StorageManager implements StorageManagerInterface
         $file = new StorageFile(
             $this->storageKeyGenerator->generate($newFilename),
             $this->getFilesystemForStorage($storage),
-            $storage
+            $storage,
+            $this->getHashCalculator()
         );
 
         $this->storeFileContent($file, $content, $options);
@@ -160,7 +162,15 @@ class StorageManager implements StorageManagerInterface
                 $metadata['ContentType'] = 'binary/octet-stream';
             }
 
-            $bytes = $file->setContent($content, $metadata);
+            $file->setContent($content, $metadata);
+            if (is_resource($content)) {
+                $bytes = Size::fromResource($content);
+            } else if ($content instanceof StreamInterface) {
+                $bytes = $content->getSize();
+            } else {
+                $bytes = Size::fromContent($content);
+            }
+            $file->setSize($bytes);
         }
 
         $file->setMimeType($metadata['ContentType']);
@@ -557,5 +567,20 @@ class StorageManager implements StorageManagerInterface
         $resolver->setDefault('metadata', []);
 
         return $resolver;
+    }
+
+    private function getHashCalculator()
+    {
+        return function ($content) {
+            if (is_resource($content) || $content instanceof StreamInterface) {
+                $destinationPath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid('content-for-hash');
+                file_put_contents($destinationPath, $content);
+                $hash = md5_file($destinationPath);
+                unlink($destinationPath);
+                return $hash;
+            } else {
+                return md5($content);
+            }
+        };
     }
 }
